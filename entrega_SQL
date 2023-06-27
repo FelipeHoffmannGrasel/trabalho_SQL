@@ -1,0 +1,88 @@
+-- 1- Qual o número de hubs por cidade?
+select count(hub_city), hub_city 
+from hubs 
+group by hub_city;
+
+-- 2- Qual o número de pedidos (orders) por status?
+select count(order_id)
+from orders
+group by order_status;
+
+-- 3- Qual o número de lojas (stores) por cidade dos hubs?
+select count(s.store_id), h.hub_city 
+from stores s
+inner join hubs h on s.hub_id = h.hub_id
+group by h.hub_city;
+
+-- 4- Qual o maior e o menor valor de pagamento (payment_amount) registrado?
+select max(payment_amount), min(payment_amount) 
+from payments;
+
+-- 5- Qual tipo de driver (driver_type) fez o maior número de entregas?
+select count(driver_type) 
+from drivers
+group by driver_type 
+order by max(driver_type);
+
+-- 6- Qual a distância média das entregas por tipo de driver (driver_modal)?
+select avg(de.delivery_distance_meters)
+from drivers dr
+inner join deliveries de on dr.driver_id = de.driver_id
+group by driver_modal;
+
+-- 7- Qual a média de valor de pedido (order_amount) por loja, em ordem decrescente?
+select avg(o.order_amount) as average_order_amount, s.store_name
+from stores s
+join orders o on s.store_id = o.store_id
+group by s.store_id,s.store_name
+order by average_order_amount desc;
+
+-- 8- Existem pedidos que não estão associados a lojas? Se caso positivo, quantos?
+select count(*) as orders_without_stores
+from orders
+where store_id is null;
+
+-- 9- Qual o valor total de pedido (order_amount) no channel 'FOOD PLACE'?
+select sum(o.order_amount) as total_orders
+from orders o
+inner join channels c on o.channel_id = c.channel_id
+where c.channel_name = 'FOOD PLACE';
+
+-- 10- Quantos pagamentos foram cancelados (chargeback)?
+select count(*) as cancel_payments
+from payments
+where payment_status = 'chargeback';
+
+-- 11- Qual foi o valor médio dos pagamentos cancelados (chargeback)?
+select avg(payment_amount) as cancel_payment_avg
+from payments
+where payment_status = 'chargeback';
+
+-- 12- Qual a média do valor de pagamento por método de pagamento(payment_method) em ordem decrescente?
+select payment_method, avg(payment_amount) as payment_method_avg
+from payments
+group by payment_method
+order by media_pagamento_metodo desc;
+
+-- 13- Quais métodos de pagamento tiveram valor médio superior a 100?
+select payment_method
+from payments
+group by payment_method
+having avg(payment_amount) > 100;
+
+-- 14- Qual a média de valor de pedido (order_amount) por estado do hub(hub_state), segmento da loja (store_segment) e tipo de canal (channel_type)?
+select avg(o.order_amount), h.hub_state, s.store_segment, c.channel_type
+from orders o
+inner join stores s on o.store_id = s.store_id
+inner join channels c on o.channel_id = c.channel_id
+inner join hubs h on s.hub_id = h.hub_id
+group by h.hub_state, s.store_segment, c.channel_type;
+
+-- 15- Qual estado do hub (hub_state), segmento da loja (store_segment) e tipo de canal (channel_type) teve média de valor de pedido (order_amount) maior que 450? 
+select h.hub_state, s.store_segment, c.channel_type
+from hubs h
+inner join stores s on h.hub_id = s.hub_id
+inner join orders o on s.store_id = o.store_id
+inner join channels c on o.channel_id = c.channel_id
+group by h.hub_state, s.store_segment, c.channel_type
+having avg(o.order_amount) > 450;
